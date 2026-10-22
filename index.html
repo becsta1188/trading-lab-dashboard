@@ -10,25 +10,35 @@
   color-scheme:dark;
   --bg:#0b1020;
   --card:#171f35;
+  --panel:#10182c;
   --line:#303b55;
   --text:#edf2ff;
   --muted:#a4b2cc;
   --green:#4ade80;
   --red:#fb7185;
 }
-* {box-sizing:border-box}
+* { box-sizing:border-box; }
 body {
   margin:0;
   background:var(--bg);
   color:var(--text);
   font-family:system-ui,-apple-system,sans-serif;
 }
-main {max-width:1150px;margin:auto;padding:32px 18px}
-h1 {font-size:clamp(28px,5vw,42px);margin-bottom:6px}
-.subtitle {color:var(--muted);margin-bottom:30px}
+main {
+  max-width:1150px;
+  margin:auto;
+  padding:32px 18px;
+}
+h1 {
+  font-size:clamp(28px,5vw,42px);
+  margin:0 0 6px;
+}
+h2 { font-size:19px; margin:0 0 16px; }
+h3 { font-size:16px; margin:24px 0 12px; }
+.subtitle { color:var(--muted); margin-bottom:30px; }
 .grid {
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(235px,1fr));
   gap:18px;
 }
 .card {
@@ -36,10 +46,20 @@ h1 {font-size:clamp(28px,5vw,42px);margin-bottom:6px}
   border:1px solid var(--line);
   border-radius:18px;
   padding:22px;
+  min-width:0;
 }
-.card h2 {font-size:19px;margin:0 0 12px}
-.label {color:var(--muted);font-size:13px}
-.value {font-size:30px;font-weight:700;margin:6px 0 16px}
+.section { margin-top:22px; }
+.label {
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+.value {
+  font-size:clamp(22px,3vw,30px);
+  font-weight:700;
+  margin:6px 0 16px;
+  overflow-wrap:anywhere;
+}
 .status {
   display:inline-block;
   border:1px solid var(--line);
@@ -49,9 +69,20 @@ h1 {font-size:clamp(28px,5vw,42px);margin-bottom:6px}
   font-size:12px;
   margin-bottom:14px;
 }
-.positive {color:var(--green)}
-.negative {color:var(--red)}
-a {color:#93c5fd}
+.stats {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:14px;
+}
+.stat {
+  background:var(--panel);
+  border-radius:12px;
+  padding:15px;
+}
+.stat .value { font-size:21px; margin-bottom:0; }
+.positive { color:var(--green); }
+.negative { color:var(--red); }
+a { color:#93c5fd; }
 button {
   background:#263755;
   border:1px solid #526383;
@@ -60,30 +91,40 @@ button {
   padding:10px 14px;
   cursor:pointer;
 }
-button:hover {background:#35496c}
-.note {margin-top:28px;color:var(--muted);line-height:1.6}
-footer {margin-top:32px;color:var(--muted);font-size:12px}
-.metric-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:16px;
-  margin:18px 0;
+button:hover { background:#35496c; }
+.table-wrap { overflow-x:auto; }
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
 }
-.metric {
-  padding:15px;
-  background:#10182b;
-  border-radius:12px;
+th,td {
+  padding:12px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  white-space:nowrap;
 }
-.metric strong {display:block;margin-top:8px;font-size:20px}
-canvas {width:100%;height:260px;display:block}
-table {width:100%;border-collapse:collapse;font-size:13px}
-th,td {padding:10px;text-align:left;border-bottom:1px solid var(--line)}
-.table-wrap {overflow-x:auto}
-.error {color:var(--red)}
+th { color:var(--muted); font-weight:600; }
+canvas {
+  width:100%;
+  height:auto;
+  display:block;
+}
+.note {
+  margin-top:28px;
+  color:var(--muted);
+  line-height:1.6;
+}
+footer {
+  margin-top:32px;
+  color:var(--muted);
+  font-size:12px;
+}
 </style>
 </head>
 <body>
 <main>
+
 <h1>Trading Lab</h1>
 <p class="subtitle">
 Four automated trading experiments. One dashboard.
@@ -91,67 +132,89 @@ Four automated trading experiments. One dashboard.
 
 <div class="grid" id="bots"></div>
 
-<section class="card" style="margin-top:22px">
-<h2>Experiment overview</h2>
-<p class="label">Portfolio data connection</p>
-<p id="overview">Connecting to crypto trading data...</p>
-<button id="refresh">Refresh dashboard</button>
+<section class="card section">
+  <h2>Experiment overview</h2>
+  <p class="label">Portfolio data connection</p>
+  <p id="overview">Loading crypto paper-trading results...</p>
+  <button onclick="location.reload()">Refresh dashboard</button>
 </section>
 
-<section class="card" style="margin-top:22px">
-<h2>Aggressive Multi-Crypto Performance</h2>
-<div class="metric-grid">
-<div class="metric">
-<span class="label">Portfolio value</span>
-<strong id="crypto-total">—</strong>
-</div>
-<div class="metric">
-<span class="label">Profit / Loss</span>
-<strong id="crypto-profit">—</strong>
-</div>
-<div class="metric">
-<span class="label">Return</span>
-<strong id="crypto-return">—</strong>
-</div>
-<div class="metric">
-<span class="label">Simulated trades</span>
-<strong id="crypto-trades">—</strong>
-</div>
-</div>
-<h3>Portfolio history</h3>
-<canvas id="chart" aria-label="Portfolio performance chart"></canvas>
-<p class="label" id="chart-note"></p>
-</section>
+<section class="card section">
+  <h2>Aggressive Multi-Crypto Performance</h2>
+  <p id="updated" class="label">Checking saved data...</p>
 
-<section class="card" style="margin-top:22px">
-<h2>Current Crypto Holdings</h2>
-<div id="holdings">Loading...</div>
-</section>
+  <div class="stats">
+    <div class="stat">
+      <div class="label">Portfolio value</div>
+      <div class="value" id="portfolio">—</div>
+    </div>
+    <div class="stat">
+      <div class="label">Profit / Loss</div>
+      <div class="value" id="profit">—</div>
+    </div>
+    <div class="stat">
+      <div class="label">Return</div>
+      <div class="value" id="return">—</div>
+    </div>
+    <div class="stat">
+      <div class="label">Simulated trades</div>
+      <div class="value" id="trade-count">—</div>
+    </div>
+  </div>
 
-<section class="card" style="margin-top:22px">
-<h2>Simulated Trade History</h2>
-<div id="history">Loading...</div>
+  <h3>Portfolio history</h3>
+  <p id="chart-status" class="label"></p>
+  <canvas id="chart" width="900" height="330"></canvas>
+
+  <h3>Current holdings</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Coin</th>
+          <th>Quantity</th>
+          <th>Entry price</th>
+        </tr>
+      </thead>
+      <tbody id="holdings"></tbody>
+    </table>
+  </div>
+
+  <h3>Simulated trade history</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Coin</th>
+          <th>Action</th>
+          <th>Quantity</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody id="trades"></tbody>
+    </table>
+  </div>
 </section>
 
 <p class="note">
-This dashboard displays simulated trading results.
-Crypto data is retrieved from the bot's latest published
-GitHub state file. Other experiments are not yet connected.
-No real orders are placed by this dashboard.
+  This dashboard displays simulated trading results
+  saved by the trading bots. Values may be delayed.
+  All crypto values are denominated in USDT.
+  No real orders are placed by this dashboard.
 </p>
 
 <footer>
 Trading Lab | Paper trading only | Educational experiment
 </footer>
+
 </main>
 
 <script>
-const OWNER = "becsta1188";
+const USER = "becsta1188";
 const CRYPTO_REPO = "crypto-aggressive-paper-bot";
-const CRYPTO_URL =
-  `https://raw.githubusercontent.com/${OWNER}/${CRYPTO_REPO}/main/crypto_state.json`;
-
-const INITIAL_CRYPTO = 1000;
+const STATE_URL =
+  `https://raw.githubusercontent.com/${USER}/${CRYPTO_REPO}/main/crypto_state.json`;
 
 const bots = [
   {
@@ -175,320 +238,272 @@ const bots = [
     market:"High-risk Australian shares",
     balance:"A$5,000",
     description:"Initial simulated capital; current value not connected",
-    repo:"asx-agressive-paper-bot",
+    repo:"asx-aggressive-paper-bot",
     status:"Awaiting data"
   },
   {
     name:"Aggressive Multi-Crypto",
     market:"Cryptocurrencies",
     balance:"Loading...",
-    description:"Connecting to saved portfolio state",
+    description:"Saved simulated portfolio data",
     repo:CRYPTO_REPO,
-    status:"Connecting..."
+    status:"Checking connection"
   }
 ];
 
-const container = document.getElementById("bots");
+function el(tag,text,cls) {
+  const node=document.createElement(tag);
+  if(text!==undefined) node.textContent=String(text);
+  if(cls) node.className=cls;
+  return node;
+}
 
-bots.forEach(bot => {
-  const card = document.createElement("article");
-  card.className = "card";
-
-  const title = document.createElement("h2");
-  title.textContent = bot.name;
-
-  const status = document.createElement("span");
-  status.className = "status";
-  status.textContent = bot.status;
-
-  const market = document.createElement("p");
-  market.className = "label";
-  market.textContent = bot.market;
-
-  const balance = document.createElement("div");
-  balance.className = "value";
-  balance.textContent = bot.balance;
-
-  const description = document.createElement("p");
-  description.className = "label";
-  description.textContent = bot.description;
-
-  const link = document.createElement("a");
-  link.href = `https://github.com/${OWNER}/${encodeURIComponent(bot.repo)}/actions`;
-  link.target = "_blank";
-  link.rel = "noopener noreferrer";
-  link.textContent = "View bot activity →";
-
-  card.append(title,status,market,balance,description,link);
-  container.appendChild(card);
-
-  if (bot.repo === CRYPTO_REPO) {
-    window.cryptoCard = {balance,status,description};
-  }
-});
-
-function money(value) {
-  return Number(value).toLocaleString("en-AU",{
+function money(n) {
+  return Number(n).toLocaleString("en-AU",{
     minimumFractionDigits:2,
     maximumFractionDigits:2
-  }) + " USDT";
+  })+" USDT";
 }
 
-function number(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : 0;
+function signed(n,suffix) {
+  return (n>=0?"+":"")+n.toFixed(2)+suffix;
 }
 
-function dateLabel(timestamp) {
-  if (!Number.isFinite(Number(timestamp))) return "Unknown";
-  return new Date(Number(timestamp)).toLocaleString("en-AU",{
+function dateText(ms) {
+  const n=Number(ms);
+  if(!Number.isFinite(n)||!n) return "—";
+  return new Date(n).toLocaleString("en-AU",{
     timeZone:"Australia/Brisbane",
-    day:"numeric",
-    month:"short",
-    year:"numeric",
-    hour:"2-digit",
-    minute:"2-digit"
+    day:"numeric",month:"short",year:"numeric",
+    hour:"2-digit",minute:"2-digit"
   });
 }
 
-function makeTable(headers,rows) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "table-wrap";
+function renderBots() {
+  const container=document.getElementById("bots");
+  container.replaceChildren();
 
-  const table = document.createElement("table");
-  const thead = document.createElement("thead");
-  const headerRow = document.createElement("tr");
+  bots.forEach(bot=>{
+    const card=el("article",undefined,"card");
+    card.appendChild(el("h2",bot.name));
+    card.appendChild(el("span",bot.status,"status"));
+    card.appendChild(el("p",bot.market,"label"));
+    card.appendChild(el("div",bot.balance,"value"));
+    card.appendChild(el("p",bot.description,"label"));
 
-  headers.forEach(label => {
-    const th = document.createElement("th");
-    th.textContent = label;
-    headerRow.appendChild(th);
+    const link=el("a","View bot activity →");
+    link.href=`https://github.com/${USER}/${bot.repo}/actions`;
+    link.target="_blank";
+    link.rel="noopener noreferrer";
+    card.appendChild(link);
+    container.appendChild(card);
   });
-
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
-
-  const tbody = document.createElement("tbody");
-
-  rows.forEach(values => {
-    const tr = document.createElement("tr");
-    values.forEach(value => {
-      const td = document.createElement("td");
-      td.textContent = String(value ?? "—");
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(tbody);
-  wrapper.appendChild(table);
-  return wrapper;
 }
 
-function drawChart(snapshots) {
-  const canvas = document.getElementById("chart");
-  const note = document.getElementById("chart-note");
-  const ctx = canvas.getContext("2d");
+function emptyRow(tbodyId,message,colspan) {
+  const row=el("tr");
+  const cell=el("td",message);
+  cell.colSpan=colspan;
+  row.appendChild(cell);
+  document.getElementById(tbodyId).appendChild(row);
+}
 
-  const width = Math.max(280,canvas.clientWidth);
-  const height = 260;
-  const ratio = window.devicePixelRatio || 1;
+function renderHoldings(positions) {
+  const tbody=document.getElementById("holdings");
+  tbody.replaceChildren();
 
-  canvas.width = Math.round(width * ratio);
-  canvas.height = Math.round(height * ratio);
-  ctx.setTransform(ratio,0,0,ratio,0,0);
-  ctx.clearRect(0,0,width,height);
-
-  const data = snapshots
-    .filter(s => Number.isFinite(Number(s.total_usdt)))
-    .sort((a,b) => number(a.bar_utc_ms)-number(b.bar_utc_ms));
-
-  if (data.length < 2) {
-    note.textContent =
-      "Waiting for more portfolio snapshots to draw a performance chart.";
+  const entries=Object.entries(positions||{});
+  if(!entries.length) {
+    emptyRow("holdings","No open simulated positions.",3);
     return;
   }
 
-  const values = data.map(s => number(s.total_usdt));
-  let min = Math.min(...values);
-  let max = Math.max(...values);
+  entries.forEach(([coin,p])=>{
+    const row=el("tr");
+    const quantity=typeof p==="object"
+      ? p.quantity??p.qty??p.shares??0 : p;
+    const entry=typeof p==="object"
+      ? p.entry??p.entry_price??p.price??null : null;
 
-  if (min === max) {
-    min -= 1;
-    max += 1;
-  }
+    [
+      coin,
+      quantity,
+      entry==null?"—":Number(entry).toFixed(6)
+    ].forEach(v=>row.appendChild(el("td",v)));
 
-  const left = 65;
-  const right = width-18;
-  const top = 20;
-  const bottom = height-35;
-
-  const x = i => left+(i/(values.length-1))*(right-left);
-  const y = v => bottom-((v-min)/(max-min))*(bottom-top);
-
-  ctx.strokeStyle = "#303b55";
-  ctx.lineWidth = 1;
-  ctx.font = "12px system-ui";
-  ctx.fillStyle = "#a4b2cc";
-
-  for (let i=0;i<=4;i++) {
-    const value = min+(max-min)*(i/4);
-    const yy = y(value);
-
-    ctx.beginPath();
-    ctx.moveTo(left,yy);
-    ctx.lineTo(right,yy);
-    ctx.stroke();
-
-    ctx.fillText(value.toFixed(2),5,yy+4);
-  }
-
-  ctx.beginPath();
-  values.forEach((value,i) => {
-    if (i===0) ctx.moveTo(x(i),y(value));
-    else ctx.lineTo(x(i),y(value));
+    tbody.appendChild(row);
   });
-  ctx.strokeStyle = "#4ade80";
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  note.textContent =
-    `${data.length} saved snapshots. Latest snapshot: ` +
-    dateLabel(data[data.length-1].bar_utc_ms);
 }
 
-function displayCrypto(data) {
-  if (!data || data.currency !== "USDT" ||
-      !Number.isFinite(Number(data.cash))) {
-    throw new Error("Unexpected crypto state format");
+function renderTrades(trades) {
+  const tbody=document.getElementById("trades");
+  tbody.replaceChildren();
+
+  if(!trades.length) {
+    emptyRow("trades","No simulated trades recorded yet.",5);
+    return;
   }
 
-  const snapshots = Array.isArray(data.snapshots)
-    ? data.snapshots : [];
+  trades.slice().reverse().forEach(t=>{
+    const row=el("tr");
+    const rawDate=t.bar_utc_ms??t.timestamp??null;
+    const when=rawDate
+      ? dateText(rawDate)
+      : t.date??t.time??"—";
 
-  const latest = snapshots.length
-    ? [...snapshots].sort(
-        (a,b)=>number(a.bar_utc_ms)-number(b.bar_utc_ms)
-      ).at(-1)
-    : null;
+    [
+      when,
+      t.symbol??t.ticker??t.coin??"—",
+      t.action??t.side??"—",
+      t.quantity??t.qty??t.shares??"—",
+      t.price??"—"
+    ].forEach(v=>row.appendChild(el("td",v)));
 
-  const cash = number(data.cash);
-  const positions = data.positions || {};
-  const trades = Array.isArray(data.trades) ? data.trades : [];
-
-  // The saved snapshot contains the bot's portfolio valuation.
-  // Without a snapshot, cash alone cannot value open holdings.
-  const total = latest
-    ? number(latest.total_usdt)
-    : Object.keys(positions).length === 0 ? cash : null;
-
-  const profit = total === null ? null : total-INITIAL_CRYPTO;
-  const percent = profit === null
-    ? null : (profit/INITIAL_CRYPTO)*100;
-
-  cryptoCard.balance.textContent =
-    total === null ? "Valuation unavailable" : money(total);
-  cryptoCard.status.textContent = "Connected";
-  cryptoCard.description.textContent = latest
-    ? "Latest saved portfolio snapshot: " +
-      dateLabel(latest.bar_utc_ms)
-    : "No portfolio snapshot available";
-
-  document.getElementById("crypto-total").textContent =
-    total === null ? "—" : money(total);
-
-  const profitEl = document.getElementById("crypto-profit");
-  const returnEl = document.getElementById("crypto-return");
-
-  profitEl.textContent = profit === null
-    ? "—" : (profit>=0?"+":"") + money(profit);
-
-  returnEl.textContent = percent === null
-    ? "—" : (percent>=0?"+":"") + percent.toFixed(2)+"%";
-
-  [profitEl,returnEl].forEach(el => {
-    el.className = profit === null ? "" :
-      profit>=0 ? "positive" : "negative";
+    tbody.appendChild(row);
   });
+}
 
-  document.getElementById("crypto-trades").textContent =
-    trades.length;
+function drawChart(snapshots) {
+  const canvas=document.getElementById("chart");
+  const status=document.getElementById("chart-status");
+  const points=snapshots
+    .filter(s=>Number.isFinite(Number(s.total_usdt)))
+    .sort((a,b)=>Number(a.bar_utc_ms)-Number(b.bar_utc_ms));
 
-  const holdingsEl = document.getElementById("holdings");
-  holdingsEl.replaceChildren();
-
-  const entries = Object.entries(positions);
-
-  if (!entries.length) {
-    holdingsEl.textContent =
-      "No open positions. The bot currently holds cash.";
-  } else {
-    holdingsEl.appendChild(makeTable(
-      ["Asset","Saved position data"],
-      entries.map(([symbol,details]) => [
-        symbol,JSON.stringify(details)
-      ])
-    ));
+  if(points.length<2) {
+    canvas.style.display="none";
+    status.textContent=
+      "Waiting for more saved portfolio snapshots.";
+    return;
   }
 
-  const historyEl = document.getElementById("history");
-  historyEl.replaceChildren();
+  canvas.style.display="block";
+  status.textContent=points.length+" saved observations";
 
-  if (!trades.length) {
-    historyEl.textContent =
-      "No simulated trades recorded yet.";
-  } else {
-    const pre = document.createElement("pre");
-    pre.style.whiteSpace = "pre-wrap";
-    pre.style.overflowWrap = "anywhere";
-    pre.textContent = JSON.stringify(trades.slice(-30),null,2);
-    historyEl.appendChild(pre);
+  const ctx=canvas.getContext("2d");
+  const W=canvas.width,H=canvas.height;
+  const left=75,right=20,top=25,bottom=45;
+  const values=points.map(p=>Number(p.total_usdt));
+
+  let min=Math.min(...values);
+  let max=Math.max(...values);
+  const spread=Math.max(max-min,1);
+  min-=spread*0.15;
+  max+=spread*0.15;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.font="13px system-ui";
+  ctx.fillStyle="#a4b2cc";
+  ctx.strokeStyle="#303b55";
+  ctx.lineWidth=1;
+
+  for(let i=0;i<=4;i++){
+    const y=top+(H-top-bottom)*i/4;
+    const val=max-(max-min)*i/4;
+    ctx.beginPath();
+    ctx.moveTo(left,y);
+    ctx.lineTo(W-right,y);
+    ctx.stroke();
+    ctx.fillText(val.toFixed(2),5,y+4);
   }
 
-  drawChart(snapshots);
+  ctx.strokeStyle="#4ade80";
+  ctx.lineWidth=3;
+  ctx.beginPath();
 
-  document.getElementById("overview").textContent =
-    "Aggressive Multi-Crypto connected. " +
-    "Portfolio: " + (total===null?"Unavailable":money(total)) +
-    " | Simulated trades: " + trades.length +
-    " | Other bots awaiting connection.";
+  values.forEach((v,i)=>{
+    const x=left+(W-left-right)*i/(values.length-1);
+    const y=H-bottom-(v-min)/(max-min)*(H-top-bottom);
+    if(i===0)ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  const first=points[0].bar_utc_ms;
+  const last=points[points.length-1].bar_utc_ms;
+  ctx.fillStyle="#a4b2cc";
+  ctx.fillText(dateText(first),left,H-12);
+  ctx.textAlign="right";
+  ctx.fillText(dateText(last),W-right,H-12);
+  ctx.textAlign="left";
 }
 
 async function loadCrypto() {
-  const overview = document.getElementById("overview");
-  overview.textContent = "Fetching latest saved crypto results...";
-
   try {
-    const response = await fetch(CRYPTO_URL+"?t="+Date.now(),{
+    const response=await fetch(STATE_URL+"?v="+Date.now(),{
       cache:"no-store"
     });
+    if(!response.ok) throw new Error("HTTP "+response.status);
 
-    if (!response.ok) {
-      throw new Error("HTTP "+response.status);
-    }
+    const state=await response.json();
+    const snapshots=Array.isArray(state.snapshots)
+      ? state.snapshots : [];
+    const trades=Array.isArray(state.trades)
+      ? state.trades : [];
 
-    const data = await response.json();
-    displayCrypto(data);
+    const latest=snapshots.length
+      ? snapshots.slice().sort(
+          (a,b)=>Number(b.bar_utc_ms)-Number(a.bar_utc_ms)
+        )[0] : null;
 
-  } catch(error) {
-    cryptoCard.status.textContent = "Connection error";
-    cryptoCard.balance.textContent = "Unavailable";
-    cryptoCard.description.textContent =
-      "Could not retrieve saved results.";
+    const cash=Number(state.cash??0);
+    const total=Number(latest?.total_usdt??cash);
+    const start=1000;
+    const profit=total-start;
+    const percent=profit/start*100;
 
-    overview.textContent =
-      "Crypto data could not be loaded: " + error.message;
-    overview.className = "error";
+    document.getElementById("portfolio").textContent=money(total);
+
+    const profitEl=document.getElementById("profit");
+    profitEl.textContent=signed(profit," USDT");
+    profitEl.className="value "+(profit>=0?"positive":"negative");
+
+    const returnEl=document.getElementById("return");
+    returnEl.textContent=signed(percent,"%");
+    returnEl.className="value "+(percent>=0?"positive":"negative");
+
+    document.getElementById("trade-count").textContent=trades.length;
+
+    document.getElementById("updated").textContent=latest
+      ? "Latest saved portfolio snapshot: "+dateText(latest.bar_utc_ms)
+      : "No portfolio snapshots available.";
+
+    bots[3].balance=money(total);
+    bots[3].status="Connected";
+    bots[3].description=latest
+      ? "Latest saved snapshot: "+dateText(latest.bar_utc_ms)
+      : "Saved state loaded; no snapshots yet.";
+    renderBots();
+
+    document.getElementById("overview").textContent=
+      "Aggressive Multi-Crypto connected. Portfolio: "+
+      money(total)+" | Simulated trades: "+trades.length+
+      " | Other bots awaiting connection.";
+
+    renderHoldings(state.positions);
+    renderTrades(trades);
+    drawChart(snapshots);
+
+  } catch(err) {
+    bots[3].balance="Unavailable";
+    bots[3].status="Connection error";
+    bots[3].description="Could not read saved trading state.";
+    renderBots();
+
+    document.getElementById("overview").textContent=
+      "Crypto data connection failed: "+err.message;
+    document.getElementById("updated").textContent=
+      "Could not load saved results.";
+    document.getElementById("chart").style.display="none";
+    document.getElementById("chart-status").textContent=
+      "Waiting for connection.";
+    emptyRow("holdings","Data unavailable.",3);
+    emptyRow("trades","Data unavailable.",5);
   }
 }
 
-document.getElementById("refresh")
-  .addEventListener("click",loadCrypto);
-
+renderBots();
 loadCrypto();
-
-// Refresh saved results every five minutes.
-setInterval(loadCrypto,5*60*1000);
 </script>
 </body>
 </html>
