@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trading Lab Dashboard</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#0b1020;
+  --card:#171f35;
+  --line:#303b55;
+  --text:#edf2ff;
+  --muted:#a4b2cc;
+  --green:#4ade80;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,sans-serif;
+}
+main { max-width:1150px; margin:auto; padding:32px 18px; }
+h1 { font-size:clamp(28px,5vw,42px); margin-bottom:6px; }
+.subtitle { color:var(--muted); margin-bottom:30px; }
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:18px;
+}
+.card {
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:22px;
+}
+.card h2 { font-size:19px; margin:0 0 12px; }
+.label { color:var(--muted); font-size:13px; }
+.value { font-size:30px; font-weight:700; margin:6px 0 16px; }
+.status {
+  display:inline-block;
+  border:1px solid var(--line);
+  border-radius:30px;
+  padding:6px 12px;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:14px;
+}
+a { color:#93c5fd; }
+button {
+  background:#263755;
+  border:1px solid #526383;
+  border-radius:9px;
+  color:white;
+  padding:10px 14px;
+  cursor:pointer;
+}
+button:hover { background:#35496c; }
+.note { margin-top:28px; color:var(--muted); line-height:1.6; }
+footer { margin-top:32px; color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Trading Lab</h1>
+  <p class="subtitle">Four automated trading experiments. One dashboard.</p>
+
+  <div class="grid" id="bots"></div>
+
+  <section class="card" style="margin-top:22px">
+    <h2>Experiment overview</h2>
+    <p class="label">Portfolio data connection</p>
+    <p id="overview">Awaiting verified results from the trading bots.</p>
+    <button onclick="location.reload()">Refresh dashboard</button>
+  </section>
+
+  <p class="note">
+    This dashboard currently displays setup information.
+    Live portfolio values, returns, transactions and charts
+    will be enabled when each bot publishes its results.
+    No real orders are placed by this dashboard.
+  </p>
+
+  <footer>
+    Trading Lab | Paper trading only | Educational experiment
+  </footer>
+</main>
+
+<script>
+const bots = [
+  {
+    name:"Bitcoin Paper Trader",
+    market:"Bitcoin",
+    balance:"A$991.31",
+    description:"Last observed portfolio value, 22 October 2026",
+    repo:"bitcoin-paper-bot",
+    status:"Historical observation"
+  },
+  {
+    name:"ASX Paper Trader",
+    market:"Australian shares",
+    balance:"A$5,000 per portfolio",
+    description:"Initial simulated capital; current value not connected",
+    repo:"asx-paper-bot",
+    status:"Awaiting data"
+  },
+  {
+    name:"Aggressive ASX",
+    market:"High-risk Australian shares",
+    balance:"A$5,000",
+    description:"Initial simulated capital; current value not connected",
+    repo:"asx-agressive-paper-bot",
+    status:"Awaiting data"
+  },
+  {
+    name:"Aggressive Multi-Crypto",
+    market:"Cryptocurrencies",
+    balance:"1,000 USDT",
+    description:"Last observed simulated portfolio value",
+    repo:"crypto-aggressive-paper-bot",
+    status:"Historical observation"
+  }
+];
+
+const container = document.getElementById("bots");
+
+bots.forEach(bot => {
+  const card = document.createElement("article");
+  card.className = "card";
+
+  const title = document.createElement("h2");
+  title.textContent = bot.name;
+
+  const status = document.createElement("span");
+  status.className = "status";
+  status.textContent = bot.status;
+
+  const market = document.createElement("p");
+  market.className = "label";
+  market.textContent = bot.market;
+
+  const balance = document.createElement("div");
+  balance.className = "value";
+  balance.textContent = bot.balance;
+
+  const description = document.createElement("p");
+  description.className = "label";
+  description.textContent = bot.description;
+
+  const link = document.createElement("a");
+  link.href = "https://github.com/becsta118/" +
+    encodeURIComponent(bot.repo) + "/actions";
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = "View bot activity →";
+
+  card.append(title,status,market,balance,description,link);
+  container.appendChild(card);
+});
+</script>
+</body>
+</html>
